@@ -7,7 +7,7 @@ def data_json(file_name):
         return filejson
 
 
-def get_state(data):
+def get_executed_data(data):
     executed_operations = []
     for i in data:
         if i.get('state'):
@@ -16,36 +16,37 @@ def get_state(data):
     return executed_operations
 
 
-def last_five_operations(executed_data):
+def get_last_five(executed_data):
     sorted_operations = sorted(executed_data, key=lambda x: x["date"], reverse=True)
     last_five = sorted_operations[0:5]
     return last_five
 
-
-def all_data(last_five):
+def parse_operations_data(last_five):
     list_of_data = []
-    for i in last_five:
-        date = i.get('date')
-        formated_date = date.replace('-', '.')
-        description = i.get('description')
-        operations_amount = i['operationAmount']['amount']
-        currency = i['operationAmount']['currency']['name']
-        to_ = i['to']
-        if i.get('from') is None:
-            from_ = ''.join('NoName')
+    for operation_data in last_five:
+        date = operation_data.get('date').split('T')[0]
+        formatted_date = '.'.join(date.split('-')[::-1])
+        description = operation_data.get('description')
+        operations_amount = operation_data['operationAmount']['amount']
+        currency = operation_data['operationAmount']['currency']['name']
+        card_to = operation_data.get('to').split()[-1]
+        card_type_to = ' '.join(operation_data.get('to').split()[:-1])
+        star_card_to = '*' * 2 + card_to[-4:]
+        if operation_data.get('from') is None:
+            star_card_from = 'NoName'
+            card_type_from = ''
         else:
-            from_ = i['from']
-            card_from = from_.split(' ')[-1]
-            star_card = card_from[0:7] + len(card_from[7:14]) * '*' + card_from[-4:]
+            card_type_from = ' '.join(operation_data.get('from').split()[:-1])
+            card_number = operation_data.get('from').split()[-1]
+            star_card_from = f' {card_number[0:4]} {card_number[4:6]}** **** {card_number[-4:]}'
 
-            # print(f'{formated_date},{description},{operations_amount}, {currency}, {to_}, {from_}')
-            print(star_card)
+        list_of_data.append(f'''{formatted_date} {description}
+{card_type_from}{star_card_from} -> {card_type_to} {star_card_to}
+{operations_amount} {currency}''')
+
+    return list_of_data
 
 
-gtx = data_json('operations.json')
-gtx1 = get_state(gtx)
-gtx2 = last_five_operations(gtx1)
-# print(gtx2)
-# for i in gtx2:
-#     print(i)
-all_data(gtx2)
+
+
+
