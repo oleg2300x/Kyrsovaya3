@@ -21,6 +21,7 @@ def get_last_five(executed_data):
     last_five = sorted_operations[0:5]
     return last_five
 
+
 def parse_operations_data(last_five):
     list_of_data = []
     for operation_data in last_five:
@@ -37,16 +38,17 @@ def parse_operations_data(last_five):
             card_type_from = ''
         else:
             card_type_from = ' '.join(operation_data.get('from').split()[:-1])
-            card_number = operation_data.get('from').split()[-1]
-            star_card_from = f' {card_number[0:4]} {card_number[4:6]}** **** {card_number[-4:]}'
+            type_card = operation_data.get('from').split()[0]
+            if type_card in 'Счет':
+                card_number = operation_data.get('from').split()[-1]
+                star_card_from = f' {"*" * 2}{card_number[-4:]}'
+            else:
+                card_number = operation_data.get('from').split()[-1]
+                star_card_from = f' {card_number[0:4]} {card_number[4:6]}** **** {card_number[-4:]}'
 
         list_of_data.append(f'''{formatted_date} {description}
 {card_type_from}{star_card_from} -> {card_type_to} {star_card_to}
 {operations_amount} {currency}''')
 
     return list_of_data
-
-
-
-
 
